@@ -1,0 +1,8 @@
+
+- (bonus) add virtualenv and relevant .gitignore
+
+- use python requests [http://docs.python-requests.org/en/latest/] to get the HTML from the maps URL [ http://www.jnul.huji.ac.il/dl/maps/jer/html/date.html ]
+
+- use BeautifulSoup4 to scrape the map data (see here: https://github.com/niryariv/opentaba-server/blob/master/tools/scrapelib.py#L44 )
+
+- write the data as CSV file
