@@ -81,11 +81,11 @@ for i in range(len(table)):
 			res[j].append(tempList[j].text)
 			#print res[j]," *** 2nd loop for map year attributes"
 
-			urlYearDictionary.append[res[j]] #append the triple to the main dictionary
+			urlYearDictionary.append(res[j]) #append the triple to the main dictionary
 
 
 
-
+print urlYearDictionary
 
 
 
