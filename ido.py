@@ -1,9 +1,11 @@
 import re
 import requests
+import csv
+import sys
 from bs4 import BeautifulSoup
 
 
-# helper function to extract year string from year
+# A helper function to extract year string from year
 def _extract_year(str):
 
 	#try to find a four-digit year
@@ -23,10 +25,27 @@ def _extract_year(str):
 
 	return None
 
+# A helper function to write the URL/Year dictionary to a CSV file 
+def _write_csv(mapsDictionary):
 
-r = requests.get('http://www.jnul.huji.ac.il/dl/maps/jer/html/date.html')
+	f = open('urls2maps.csv', 'wt')
+	try:
+	    writer = csv.writer(f)
 
-""" try:
+	    for i in mapsDictionary:
+	        writer.writerow( (i[0], i[1], i[2]) )
+
+	finally:
+	    f.close()
+
+	return()
+
+#print open('urls2maps.csv', 'rt').read()
+
+
+#r = requests.get('http://www.jnul.huji.ac.il/dl/maps/jer/html/date.html')
+
+try:
 	r = requests.get('http://www.jnul.huji.ac.il/dl/maps/jer/html/date.html')
 
 
@@ -37,7 +56,7 @@ r = requests.get('http://www.jnul.huji.ac.il/dl/maps/jer/html/date.html')
 
 except Exception, e:
 		print "ERROR: %s" % e
-		exit()"""
+		exit()
 
 
 
@@ -86,6 +105,9 @@ for i in range(len(table)):
 
 
 print urlYearDictionary
+
+_write_csv(urlYearDictionary)
+
 
 
 
