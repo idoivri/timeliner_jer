@@ -32,7 +32,7 @@ def _year_to_date(year):
 # Start Date, End Date, Headline, Text,	Media, Media Credit, Media Caption,	Media Thumbnail, Type, Tag
 def output_csv(mapsDictionary):
 
-    writer = csv.writer(sys.stdout)
+    writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
 
     for i in mapsDictionary:
         writer.writerow( (i[1], i[2], 'map headline', 'map text', i[0], 'media credit', i[0], 'type', 'tag') )
