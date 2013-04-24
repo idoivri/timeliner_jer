@@ -74,7 +74,7 @@ soup = BeautifulSoup(r.text)
 data = soup.find("table", cols="5")
 table = data.find_all('tr')
 
-numCols = 5; #there are 5 columns in the map webpage
+# numCols = 1; #there are 5 columns in the map webpage
 alldata = []
 
 for i in range(len(table)):
@@ -87,30 +87,27 @@ for i in range(len(table)):
 		#fill in the map URLs:
 		tempList = table[i].find_all("td");
 
-		for j in range(numCols):
+		img_url = tempList[0].find_next("img").get('src')
+		row['thumb'] = img_url
 
-			img_url = tempList[j].find_next("img").get('src')
-			row['thumb'] = img_url
+		info_url = 'http://www.jnul.huji.ac.il/dl/maps/jer/html/' + tempList[0].find_next("a").get('href')
 
-			info_url = 'http://www.jnul.huji.ac.il/dl/maps/jer/html/' + tempList[j].find_next("a").get('href')
+		image_url, headline, text, caption = get_details(info_url)
 
-			image_url, headline, text, caption = get_details(info_url)
-
-			row['image'] 	= image_url
-			row['headline'] = headline.encode('utf-8')
-			row['text'] 	= text.encode('utf-8')
-			row['caption']	= caption.encode('utf-8')
+		row['image'] 	= image_url
+		row['headline'] = headline.encode('utf-8')
+		row['text'] 	= text.encode('utf-8')
+		row['caption']	= caption.encode('utf-8')
 
 		#fill in the map year attributes:
 		tempList = table[i+1].find_all("td");
 
-		for j in range(numCols):
-			y = _extract_year(tempList[j].text)
-			year = _year_to_date(y)
+		y = _extract_year(tempList[0].text)
+		year = _year_to_date(y)
 
-			row['start'] = year
-			row['end'] = year
+		row['start'] = year
+		row['end'] = year
 
-			alldata.append(row)
+		alldata.append(row)
 
 output_csv(alldata)
