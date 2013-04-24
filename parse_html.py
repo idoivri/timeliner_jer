@@ -1,9 +1,9 @@
 import re
 import requests
-import csv
+# import csv
 import sys
 from bs4 import BeautifulSoup
-
+import json
 
 # A helper function to extract year string from year
 def _extract_year(str):
@@ -32,8 +32,9 @@ def _year_to_date(year):
 # Start Date, End Date, Headline, Text,	Media, Media Credit, Media Caption,	Media Thumbnail, Type, Tag
 def output_csv(mapsDictionary):
     for i in mapsDictionary:
+    	# out = json.dumps(i, ensure_ascii=False)
     	out ='"%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s"' % \
-    		(i[3], i[4], i[2], i[2], i[1], 'media credit', i[0], 'type', 'tag')
+    		(i[3], i[4], json.dumps(i[2], ensure_ascii=False), json.dumps(i[2], ensure_ascii=False), i[1], 'media credit', i[0], 'type', 'tag')
     	print out.encode('utf-8')
     	
 
