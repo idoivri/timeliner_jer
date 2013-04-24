@@ -36,9 +36,7 @@ def output_csv(mapsDictionary):
     writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
 
     writer.writerow(('Start Date', 'End Date', 'Headline', 'Text', 'Media', 'Media Credit', 'Media Caption', 'Media Thumbnail'))
-
     for i in mapsDictionary:
-        # writer.writerow( (i[4], i[5], i[2].encode('utf-8'), i[3].encode('utf-8'), i[1], 'National Library of Israel', i[1], 'type') )
         writer.writerow((i['start'], i['end'], i['headline'], i['text'], i['image'], 'National Library of Israel', i['caption'], i['thumb']))
 
 
@@ -60,14 +58,10 @@ def get_details(url):
 		headline = notes.pop(0)
 		text = '\n'.join(notes)
 
-	# print image_url, headline, text, caption
-	# for n in bs.find_all(text="Note"):
-	# 	notes += ' ' + n.find_next('td').text
-
-	# print notes
-
 	return image_url, headline, text, caption
 
+
+# START HERE
 
 r = requests.get('http://www.jnul.huji.ac.il/dl/maps/jer/html/date.html')
 
@@ -78,13 +72,9 @@ if r.status_code != 200:
 soup = BeautifulSoup(r.text)
 
 data = soup.find("table", cols="5")
-
 table = data.find_all('tr')
 
 numCols = 5; #there are 5 columns in the map webpage
-
-# urlYearDictionary = [] #dictionary to contain url,year,label triples
-
 alldata = []
 
 for i in range(len(table)):
@@ -100,26 +90,16 @@ for i in range(len(table)):
 		for j in range(numCols):
 
 			img_url = tempList[j].find_next("img").get('src')
-			# res[j].append(img_url)
 			row['thumb'] = img_url
 
 			info_url = 'http://www.jnul.huji.ac.il/dl/maps/jer/html/' + tempList[j].find_next("a").get('href')
 
 			image_url, headline, text, caption = get_details(info_url)
 
-			# res[j].append(image_url)
-			# res[j].append(headline.encode('utf-8'))
-			# res[j].append(text.encode('utf-8'))
-			# res[j].append(caption.encode('utf-8'))
-
 			row['image'] 	= image_url
 			row['headline'] = headline.encode('utf-8')
 			row['text'] 	= text.encode('utf-8')
 			row['caption']	= caption.encode('utf-8')
-
-			# print info_url
-			# detail_urls.append(info_url)
-			# print img_url
 
 		#fill in the map year attributes:
 		tempList = table[i+1].find_all("td");
@@ -128,19 +108,9 @@ for i in range(len(table)):
 			y = _extract_year(tempList[j].text)
 			year = _year_to_date(y)
 
-			# res[j].append(year) # start date
-			# res[j].append(year) # end date 
-
 			row['start'] = year
 			row['end'] = year
 
-			# print row
-			
-			# urlYearDictionary.append(res[j]) #append the triple to the main dictionary
 			alldata.append(row)
 
-# print detail_urls
-# print urlYearDictionary
-
-# output_csv(urlYearDictionary)
 output_csv(alldata)
