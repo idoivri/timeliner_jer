@@ -27,25 +27,19 @@ def _extract_year(str):
 def _year_to_date(year):
 	return "1/1/%s 0:00:00" % year
 
-
-# # A helper function to write the URL/Year dictionary to a CSV file 
-# Start Date, End Date, Headline, Text,	Media, Media Credit, Media Caption,	Media Thumbnail, Type, Tag
-# def output_csv(mapsDictionary):
-#     for i in mapsDictionary:
-#     	# out = json.dumps(i, ensure_ascii=False)
-#     	out ='"%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s"' % \
-#     		(i[3], i[4], json.dumps(i[2], ensure_ascii=False), json.dumps(i[2], ensure_ascii=False), i[1], 'media credit', i[0], 'type', 'tag')
-#     	print out.encode('utf-8')
     	
 
-# # # A helper function to write the URL/Year dictionary to a CSV file 
-# # Start Date, End Date, Headline, Text,	Media, Media Credit, Media Caption,	Media Thumbnail, Type, Tag
+# # A helper function to write the URL/Year dictionary to a CSV file 
+# Start Date, End Date, Headline, Text,	Media, Media Credit, Media Caption,	Media Thumbnail, Type
 def output_csv(mapsDictionary):
 
     writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
 
+    writer.writerow(('Start Date', 'End Date', 'Headline', 'Text', 'Media', 'Media Credit', 'Media Caption', 'Media Thumbnail'))
+
     for i in mapsDictionary:
-        writer.writerow( (i[4], i[5], i[2].encode('utf-8'), i[3].encode('utf-8'), i[1], 'National Library of Israel', i[1], 'type', 'tag') )
+        # writer.writerow( (i[4], i[5], i[2].encode('utf-8'), i[3].encode('utf-8'), i[1], 'National Library of Israel', i[1], 'type') )
+        writer.writerow((i['start'], i['end'], i['headline'], i['text'], i['image'], 'National Library of Israel', i['caption'], i['thumb']))
 
 
 def get_details(url):
@@ -54,7 +48,7 @@ def get_details(url):
 	image_url = bs.find('img', {'class':'imgthumb'}).parent.get('href')
 
 
-	notes = [] ; headline = '' ; text = ''
+	notes = [] ; headline = '' ; text = '' ; caption = ''
 	for n in bs.find_all(text="Note"):
 		notes.append(n.find_next('td').text)
 
@@ -62,16 +56,17 @@ def get_details(url):
 		headline = notes[0]
 
 	elif len(notes) > 1:
-		notes.append(notes.pop(0)) # turns out first line is usually less interesting - move it to last
+		caption = notes.pop(0)
 		headline = notes.pop(0)
 		text = '\n'.join(notes)
 
+	# print image_url, headline, text, caption
 	# for n in bs.find_all(text="Note"):
 	# 	notes += ' ' + n.find_next('td').text
 
 	# print notes
 
-	return image_url, headline, text
+	return image_url, headline, text, caption
 
 
 r = requests.get('http://www.jnul.huji.ac.il/dl/maps/jer/html/date.html')
@@ -88,13 +83,16 @@ table = data.find_all('tr')
 
 numCols = 5; #there are 5 columns in the map webpage
 
-urlYearDictionary = [] #dictionary to contain url,year,label triples
+# urlYearDictionary = [] #dictionary to contain url,year,label triples
+
+alldata = []
 
 for i in range(len(table)):
+	row = {}
 
 	if i%2==0:
 
-		res = [[] for _ in range(numCols)] #create a dictionary of 5 items representing 5 maps: [ [url,year,label] * 5 ]
+		# res = [[] for _ in range(numCols)] #create a dictionary of 5 items representing 5 maps: [ [url,year,label] * 5 ]
 
 		#fill in the map URLs:
 		tempList = table[i].find_all("td");
@@ -102,13 +100,22 @@ for i in range(len(table)):
 		for j in range(numCols):
 
 			img_url = tempList[j].find_next("img").get('src')
-			res[j].append(img_url)
+			# res[j].append(img_url)
+			row['thumb'] = img_url
+
 			info_url = 'http://www.jnul.huji.ac.il/dl/maps/jer/html/' + tempList[j].find_next("a").get('href')
 
-			image_url, headline, text = get_details(info_url)
-			res[j].append(image_url)
-			res[j].append(headline)
-			res[j].append(text)
+			image_url, headline, text, caption = get_details(info_url)
+
+			# res[j].append(image_url)
+			# res[j].append(headline.encode('utf-8'))
+			# res[j].append(text.encode('utf-8'))
+			# res[j].append(caption.encode('utf-8'))
+
+			row['image'] 	= image_url
+			row['headline'] = headline.encode('utf-8')
+			row['text'] 	= text.encode('utf-8')
+			row['caption']	= caption.encode('utf-8')
 
 			# print info_url
 			# detail_urls.append(info_url)
@@ -121,18 +128,19 @@ for i in range(len(table)):
 			y = _extract_year(tempList[j].text)
 			year = _year_to_date(y)
 
-			# print year
+			# res[j].append(year) # start date
+			# res[j].append(year) # end date 
 
-			res[j].append(year) # start date
-			res[j].append(year) # end date 
+			row['start'] = year
+			row['end'] = year
+
+			# print row
 			
-			# res[j].append(tempList[j].text)
-			#print res[j]," *** 2nd loop for map year attributes"
-
-			urlYearDictionary.append(res[j]) #append the triple to the main dictionary
-
+			# urlYearDictionary.append(res[j]) #append the triple to the main dictionary
+			alldata.append(row)
 
 # print detail_urls
 # print urlYearDictionary
 
-output_csv(urlYearDictionary)
+# output_csv(urlYearDictionary)
+output_csv(alldata)
