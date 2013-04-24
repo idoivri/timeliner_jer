@@ -53,11 +53,16 @@ def get_details(url):
 	bs = BeautifulSoup(i.text)
 	image_url = bs.find('img', {'class':'imgthumb'}).parent.get('href')
 
-	notes = bs.find_all(text="Note")
-	if len(notes) == 0:
-		headline = ""
-		text = ""
-	else:
+
+	notes = [] ; headline = '' ; text = ''
+	for n in bs.find_all(text="Note"):
+		notes.append(n.find_next('td').text)
+
+	if len(notes) == 1:
+		headline = notes[0]
+
+	elif len(notes) > 1:
+		notes.append(notes.pop(0)) # turns out first line is usually less interesting - move it to last
 		headline = notes.pop(0)
 		text = '\n'.join(notes)
 
