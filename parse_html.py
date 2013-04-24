@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 
 # A helper function to extract year string from year
 def _extract_year(str):
-
 	#try to find a four-digit year
 	match = re.search(r'\d{4}', str)
 	if match:
@@ -28,14 +27,26 @@ def _extract_year(str):
 def _year_to_date(year):
 	return "1/1/%s 0:00:00" % year
 
+
 # # A helper function to write the URL/Year dictionary to a CSV file 
 # Start Date, End Date, Headline, Text,	Media, Media Credit, Media Caption,	Media Thumbnail, Type, Tag
 def output_csv(mapsDictionary):
-
-    writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
-
     for i in mapsDictionary:
-        writer.writerow( (i[1], i[2], 'map headline', 'map text', i[0], 'media credit', i[0], 'type', 'tag') )
+    	out ='"%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s"' % \
+    		(i[3], i[4], i[2], i[2], i[1], 'media credit', i[0], 'type', 'tag')
+    	print out.encode('utf-8')
+    	
+
+# # # A helper function to write the URL/Year dictionary to a CSV file 
+# # Start Date, End Date, Headline, Text,	Media, Media Credit, Media Caption,	Media Thumbnail, Type, Tag
+# def output_csv(mapsDictionary):
+
+#     writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
+
+#     for i in mapsDictionary:
+#         writer.writerow( (i[3], i[4], i[2], 'map text', i[1], 'media credit', i[0], 'type', 'tag') )
+
+
 
 
 try:
@@ -48,6 +59,19 @@ except Exception, e:
 		print "ERROR: %s" % e
 		exit()
 
+
+def get_details(url):
+	i = requests.get(url)
+	bs = BeautifulSoup(i.text)
+	image_url = bs.find('img', {'class':'imgthumb'}).parent.get('href')
+
+	notes = ''
+	for n in bs.find_all(text="Note"):
+		notes += ' ' + n.find_next('td').text
+
+	# print notes
+
+	return image_url, notes
 
 
 
@@ -65,6 +89,7 @@ table = data.find_all('tr')
 numCols = 5; #there are 5 columns in the map webpage
 
 urlYearDictionary = [] #dictionary to contain url,year,label triples
+# detail_urls = [] # URLs for detail pages
 
 #print "length is:"+str(len(table))
 
@@ -81,7 +106,14 @@ for i in range(len(table)):
 
 			img_url = tempList[j].find_next("img").get('src')
 			res[j].append(img_url)
+			info_url = 'http://www.jnul.huji.ac.il/dl/maps/jer/html/' + tempList[j].find_next("a").get('href')
 
+			image_url, notes = get_details(info_url)
+			res[j].append(image_url)
+			res[j].append(notes)
+
+			# print info_url
+			# detail_urls.append(info_url)
 			# print img_url
 
 		#fill in the map year attributes:
@@ -102,7 +134,7 @@ for i in range(len(table)):
 			urlYearDictionary.append(res[j]) #append the triple to the main dictionary
 
 
-
+# print detail_urls
 # print urlYearDictionary
 
 output_csv(urlYearDictionary)
