@@ -1,6 +1,6 @@
 import re
 import requests
-# import csv
+import csv
 import sys
 from bs4 import BeautifulSoup
 import json
@@ -30,22 +30,22 @@ def _year_to_date(year):
 
 # # A helper function to write the URL/Year dictionary to a CSV file 
 # Start Date, End Date, Headline, Text,	Media, Media Credit, Media Caption,	Media Thumbnail, Type, Tag
-def output_csv(mapsDictionary):
-    for i in mapsDictionary:
-    	# out = json.dumps(i, ensure_ascii=False)
-    	out ='"%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s"' % \
-    		(i[3], i[4], json.dumps(i[2], ensure_ascii=False), json.dumps(i[2], ensure_ascii=False), i[1], 'media credit', i[0], 'type', 'tag')
-    	print out.encode('utf-8')
+# def output_csv(mapsDictionary):
+#     for i in mapsDictionary:
+#     	# out = json.dumps(i, ensure_ascii=False)
+#     	out ='"%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s"' % \
+#     		(i[3], i[4], json.dumps(i[2], ensure_ascii=False), json.dumps(i[2], ensure_ascii=False), i[1], 'media credit', i[0], 'type', 'tag')
+#     	print out.encode('utf-8')
     	
 
 # # # A helper function to write the URL/Year dictionary to a CSV file 
 # # Start Date, End Date, Headline, Text,	Media, Media Credit, Media Caption,	Media Thumbnail, Type, Tag
-# def output_csv(mapsDictionary):
+def output_csv(mapsDictionary):
 
-#     writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
+    writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
 
-#     for i in mapsDictionary:
-#         writer.writerow( (i[3], i[4], i[2], 'map text', i[1], 'media credit', i[0], 'type', 'tag') )
+    for i in mapsDictionary:
+        writer.writerow( (i[3], i[4], i[2].encode('utf-8'), i[2].encode('utf-8'), i[1], 'media credit', i[0], 'type', 'tag') )
 
 
 
