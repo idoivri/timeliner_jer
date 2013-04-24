@@ -45,20 +45,7 @@ def output_csv(mapsDictionary):
     writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
 
     for i in mapsDictionary:
-        writer.writerow( (i[3], i[4], i[2].encode('utf-8'), i[2].encode('utf-8'), i[1], 'media credit', i[0], 'type', 'tag') )
-
-
-
-
-try:
-	r = requests.get('http://www.jnul.huji.ac.il/dl/maps/jer/html/date.html')
-
-	if r.status_code != 200:
-		raise Exception("Status code: %s" % r.status_code)
-
-except Exception, e:
-		print "ERROR: %s" % e
-		exit()
+        writer.writerow( (i[4], i[5], i[2].encode('utf-8'), i[3].encode('utf-8'), i[1], 'National Library of Israel', i[1], 'type', 'tag') )
 
 
 def get_details(url):
@@ -66,33 +53,37 @@ def get_details(url):
 	bs = BeautifulSoup(i.text)
 	image_url = bs.find('img', {'class':'imgthumb'}).parent.get('href')
 
-	notes = ''
-	for n in bs.find_all(text="Note"):
-		notes += ' ' + n.find_next('td').text
+	notes = bs.find_all(text="Note")
+	if len(notes) == 0:
+		headline = ""
+		text = ""
+	else:
+		headline = notes.pop(0)
+		text = '\n'.join(notes)
+
+	# for n in bs.find_all(text="Note"):
+	# 	notes += ' ' + n.find_next('td').text
 
 	# print notes
 
-	return image_url, notes
+	return image_url, headline, text
 
 
+r = requests.get('http://www.jnul.huji.ac.il/dl/maps/jer/html/date.html')
+
+if r.status_code != 200:
+	print "Failed to open URL. Status code: %s" % r.status_code
+	exit()
 
 soup = BeautifulSoup(r.text)
 
-
-#print '===='
-
 data = soup.find("table", cols="5")
-
-#print data
 
 table = data.find_all('tr')
 
 numCols = 5; #there are 5 columns in the map webpage
 
 urlYearDictionary = [] #dictionary to contain url,year,label triples
-# detail_urls = [] # URLs for detail pages
-
-#print "length is:"+str(len(table))
 
 for i in range(len(table)):
 
@@ -109,9 +100,10 @@ for i in range(len(table)):
 			res[j].append(img_url)
 			info_url = 'http://www.jnul.huji.ac.il/dl/maps/jer/html/' + tempList[j].find_next("a").get('href')
 
-			image_url, notes = get_details(info_url)
+			image_url, headline, text = get_details(info_url)
 			res[j].append(image_url)
-			res[j].append(notes)
+			res[j].append(headline)
+			res[j].append(text)
 
 			# print info_url
 			# detail_urls.append(info_url)
