@@ -5,7 +5,7 @@ import sys
 from bs4 import BeautifulSoup
 import json
 
-# A helper function to extract year string from year
+# Extract year string from year
 def _extract_year(str):
 	#try to find a four-digit year
 	match = re.search(r'\d{4}', str)
@@ -24,6 +24,7 @@ def _extract_year(str):
 
 	return None
 
+# we have only year numbers - here we convert them to a full date per Timeline.JS standards
 def _year_to_date(year):
 	return "1/1/%s 0:00:00" % year
 
@@ -40,6 +41,7 @@ def output_csv(mapsDictionary):
         writer.writerow((i['start'], i['end'], i['headline'], i['text'], i['image'], 'National Library of Israel', i['caption'], i['thumb']))
 
 
+# Get data from a single map details page
 def get_details(url):
 	i = requests.get(url)
 	bs = BeautifulSoup(i.text)
@@ -72,25 +74,23 @@ if r.status_code != 200:
 soup = BeautifulSoup(r.text)
 
 data = soup.find("table", cols="5")
-table = data.find_all('tr')
+trs = data.find_all('tr')
 
 # numCols = 1; #there are 5 columns in the map webpage
 alldata = []
 
-for i in range(len(table)):
+for i in range(len(trs)):
 	row = {}
 
 	if i%2==0:
 
-		# res = [[] for _ in range(numCols)] #create a dictionary of 5 items representing 5 maps: [ [url,year,label] * 5 ]
-
 		#fill in the map URLs:
-		tempList = table[i].find_all("td");
+		tds = trs[i].find_all("td");
 
-		img_url = tempList[0].find_next("img").get('src')
+		img_url = tds[0].find_next("img").get('src')
 		row['thumb'] = img_url
 
-		info_url = 'http://www.jnul.huji.ac.il/dl/maps/jer/html/' + tempList[0].find_next("a").get('href')
+		info_url = 'http://www.jnul.huji.ac.il/dl/maps/jer/html/' + tds[0].find_next("a").get('href')
 
 		image_url, headline, text, caption = get_details(info_url)
 
@@ -100,9 +100,9 @@ for i in range(len(table)):
 		row['caption']	= caption.encode('utf-8')
 
 		#fill in the map year attributes:
-		tempList = table[i+1].find_all("td");
+		tds = trs[i+1].find_all("td");
 
-		y = _extract_year(tempList[0].text)
+		y = _extract_year(tds[0].text)
 		year = _year_to_date(y)
 
 		row['start'] = year
